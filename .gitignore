@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local run logs
+.codex-*.log
+!.env.example
+
+# personal saved pain points, auto-created on first run
+/data/
