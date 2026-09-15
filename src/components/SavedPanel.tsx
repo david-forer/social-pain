@@ -2,7 +2,7 @@
 
 import { Bookmark, Trash2, ExternalLink, MessageSquare, ThumbsUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { PainPoint } from "@/lib/pain-points";
+import { PainPoint, painPointUrl, painPointOrigin } from "@/lib/pain-points";
 
 interface SavedPanelProps {
   saved: PainPoint[];
@@ -30,7 +30,7 @@ export default function SavedPanel({ saved, onRemove }: SavedPanelProps) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {saved.map((p) => {
-          const url = `https://www.reddit.com${p.permalink}`;
+          const url = painPointUrl(p);
           const date = new Date(p.created_utc * 1000);
           const truncate = (str: string, len: number) =>
             str && str.length > len ? str.substring(0, len) + "..." : str || "";
@@ -42,7 +42,7 @@ export default function SavedPanel({ saved, onRemove }: SavedPanelProps) {
               <div className="flex items-center justify-between mb-4 text-xs font-medium text-zinc-400">
                 <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1 rounded-full border border-zinc-700/50">
                   <MessageSquare className="w-3.5 h-3.5" />
-                  r/{p.subreddit}
+                  {painPointOrigin(p)}
                 </span>
                 <span className="text-zinc-500">{formatDistanceToNow(date, { addSuffix: true })}</span>
               </div>

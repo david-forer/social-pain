@@ -5,14 +5,15 @@ import SearchHero from "@/components/SearchHero";
 import PainPointCard from "@/components/PainPointCard";
 import SavedPanel from "@/components/SavedPanel";
 import { AlertCircle, Bookmark } from "lucide-react";
-import { PainPoint } from "@/lib/pain-points";
+import { PainPoint, PainSource } from "@/lib/pain-points";
 
 type Tab = "results" | "saved";
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  const [subreddits, setSubreddits] = useState("smallbusiness,Entrepreneur,startups,SaaS,bootstrapped,solopreneur,agency,digital_marketing,marketing,SEO,PPC,content_marketing,ecommerce,operations,productmanagement");
+  const [subreddits, setSubreddits] = useState("smallbusiness,Entrepreneur,startups,SaaS,solopreneur,agency");
   const [time, setTime] = useState("year");
+  const [source, setSource] = useState<PainSource>("reddit");
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<PainPoint[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -80,10 +81,10 @@ export default function Home() {
     setTab("results");
 
     try {
-      const params = new URLSearchParams({ q: query, time });
-      if (subreddits.trim()) params.set("subreddits", subreddits.trim());
+      const params = new URLSearchParams({ q: query, time, source });
+      if (source === "reddit" && subreddits.trim()) params.set("subreddits", subreddits.trim());
 
-      const response = await fetch(`/api/reddit?${params}`);
+      const response = await fetch(`/api/search?${params}`);
       const data = await response.json();
 
       if (!response.ok) {
@@ -108,6 +109,8 @@ export default function Home() {
           setSubreddits={setSubreddits}
           time={time}
           setTime={setTime}
+          source={source}
+          setSource={setSource}
           onSearch={handleSearch}
           isLoading={isSearching}
         />

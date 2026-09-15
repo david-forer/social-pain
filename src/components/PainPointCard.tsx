@@ -2,7 +2,7 @@
 
 import { MessageSquare, ExternalLink, ThumbsUp, Calendar, Bookmark } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { PainPoint } from "@/lib/pain-points";
+import { PainPoint, painPointUrl, painPointOrigin, painPointSourceLabel } from "@/lib/pain-points";
 
 interface PainPointCardProps {
   painPoint: PainPoint;
@@ -12,7 +12,7 @@ interface PainPointCardProps {
 }
 
 export default function PainPointCard({ painPoint, isSaved, onSave, onRemove }: PainPointCardProps) {
-  const url = `https://www.reddit.com${painPoint.permalink}`;
+  const url = painPointUrl(painPoint);
   const date = new Date(painPoint.created_utc * 1000);
 
   const truncate = (str: string, length: number) => {
@@ -27,7 +27,7 @@ export default function PainPointCard({ painPoint, isSaved, onSave, onRemove }: 
       <div className="flex items-center justify-between mb-4 text-xs font-medium text-zinc-400">
         <span className="flex items-center gap-1.5 bg-zinc-800/50 px-3 py-1 rounded-full border border-zinc-700/50">
           <MessageSquare className="w-3.5 h-3.5" />
-          r/{painPoint.subreddit}
+          {painPointOrigin(painPoint)}
         </span>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1.5">
@@ -70,7 +70,7 @@ export default function PainPointCard({ painPoint, isSaved, onSave, onRemove }: 
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-sm font-semibold text-white/70 hover:text-white transition-colors bg-white/5 px-3 py-1.5 rounded-lg hover:bg-white/10"
         >
-          View on Reddit
+          View on {painPointSourceLabel(painPoint)}
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>

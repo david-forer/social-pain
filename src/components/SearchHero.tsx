@@ -1,6 +1,13 @@
 "use client";
 
 import { Search, Loader2 } from "lucide-react";
+import { PainSource, SOURCE_LABELS } from "@/lib/pain-points";
+
+const SOURCE_OPTIONS: { value: PainSource; label: string; hint: string }[] = [
+  { value: "reddit", label: SOURCE_LABELS.reddit, hint: "Apify scrape, about 3 min" },
+  { value: "hn", label: SOURCE_LABELS.hn, hint: "Free, instant" },
+  { value: "twitter", label: SOURCE_LABELS.twitter, hint: "Apify scrape, under a minute" },
+];
 
 const TIME_OPTIONS = [
   { value: "week", label: "Past week" },
@@ -16,6 +23,8 @@ interface SearchHeroProps {
   setSubreddits: (s: string) => void;
   time: string;
   setTime: (t: string) => void;
+  source: PainSource;
+  setSource: (s: PainSource) => void;
   onSearch: (e: React.FormEvent) => void;
   isLoading: boolean;
 }
@@ -27,6 +36,8 @@ export default function SearchHero({
   setSubreddits,
   time,
   setTime,
+  source,
+  setSource,
   onSearch,
   isLoading,
 }: SearchHeroProps) {
@@ -37,7 +48,7 @@ export default function SearchHero({
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
         </span>
-        Live Reddit Analyzer
+        Live Pain Point Finder
       </div>
 
       <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-center mb-6 max-w-4xl">
@@ -45,7 +56,7 @@ export default function SearchHero({
       </h1>
 
       <p className="text-lg md:text-xl text-zinc-400 text-center max-w-2xl mb-12">
-        Type an audience or topic to uncover what they really struggle with on Reddit.
+        Type an audience or topic to uncover what they really struggle with on Reddit, Hacker News, and Twitter.
       </p>
 
       <form onSubmit={onSearch} className="w-full max-w-2xl flex flex-col gap-3">
@@ -73,9 +84,32 @@ export default function SearchHero({
           </div>
         </div>
 
+        {/* Source picker */}
+        <div className="flex gap-2 items-center justify-center flex-wrap">
+          {SOURCE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              title={opt.hint}
+              onClick={() => setSource(opt.value)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                source === opt.value
+                  ? "bg-indigo-500 text-white"
+                  : "text-zinc-400 hover:text-zinc-200 bg-white/5 hover:bg-white/10"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
         {/* Filters row */}
         <div className="flex gap-3 items-center">
-          <div className="flex-1 flex items-center gap-2 h-10 rounded-full glass-panel px-4 overflow-hidden">
+          <div
+            className={`flex-1 flex items-center gap-2 h-10 rounded-full glass-panel px-4 overflow-hidden ${
+              source !== "reddit" ? "opacity-30 pointer-events-none" : ""
+            }`}
+          >
             <span className="text-zinc-500 text-xs font-medium shrink-0">r/</span>
             <input
               type="text"
