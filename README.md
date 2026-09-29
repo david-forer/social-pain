@@ -2,7 +2,7 @@
 
 A local web app that finds people describing their problems in public. Type an audience or topic, pick Reddit, Hacker News or Twitter, and it returns the posts where people complain or admit they're stuck, in their own words, with a link back to each one.
 
-I use it before writing content or an offer, to check that a problem is real and to hear how the people who have it actually talk about it. For "small business owner overwhelmed" on Twitter, the top result was a founder describing the same path every owner takes: do everything yourself, get overwhelmed, then hire.
+I use it before writing content or an offer, to check that a problem is real and to hear how the people who have it actually talk about it. A Twitter search for "small business owner overwhelmed" turned up a post describing the path most owners take: do everything yourself, get overwhelmed, then hire.
 
 ## What it does
 
