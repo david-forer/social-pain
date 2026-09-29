@@ -55,7 +55,7 @@ function buildActorInput({ query, subreddits, time }: RedditSearchParams) {
       ...common,
       maxPostCount: Math.max(3, Math.ceil(MAX_ITEMS / subreddits.length)),
       startUrls: subreddits.map((sr) => ({
-        url: `https://www.reddit.com/r/${sr}/search/?q=${encodeURIComponent(searchTerms)}&restrict_sr=1&sort=relevance&t=${time}`,
+        url: `https://www.reddit.com/r/${encodeURIComponent(sr)}/search/?q=${encodeURIComponent(searchTerms)}&restrict_sr=1&sort=relevance&t=${time}`,
       })),
     };
   }

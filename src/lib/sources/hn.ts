@@ -74,14 +74,25 @@ export async function searchHackerNews(query: string, time: string): Promise<Pai
   const json = await response.json();
   const hits: HnHit[] = json.hits || [];
 
-  // Algolia matches on keywords only, so rank pain language above raw engagement
-  return hits
-    .map(toPainPoint)
-    .filter((p): p is PainPoint => p !== null && p.selftext.length > 40)
-    .sort((a, b) => {
-      const pain = painScore(b.title + " " + b.selftext) - painScore(a.title + " " + a.selftext);
-      if (pain !== 0) return pain;
-      return b.score + b.num_comments - (a.score + a.num_comments);
+  // Algolia returns hits in relevance order, and keeps that order within each
+  // group below. People describe problems in Ask HN and Tell HN threads, so
+  // those rank first. Comments elsewhere are usually a passing mention of the
+  // query words, and the monthly hiring threads are job ads, so both are dropped.
+  const discussion = /^(Ask|Tell) HN/i;
+  const hiring = /who is hiring|who wants to be hired|freelancer\? seeking freelancer/i;
+
+  const points = hits
+    .filter((hit) => {
+      const thread = hit.story_title || hit.title || "";
+      if (hiring.test(thread)) return false;
+      return !hit._tags.includes("comment") || discussion.test(thread);
     })
-    .slice(0, 25);
+    .map(toPainPoint)
+    .filter((p): p is PainPoint => p !== null && p.selftext.length > 40);
+
+  const isDiscussion = (p: PainPoint) => discussion.test(p.title.replace(/^Re: /, ""));
+  const ranked = [...points.filter(isDiscussion), ...points.filter((p) => !isDiscussion(p))];
+  const painful = ranked.filter((p) => painScore(p.title + " " + p.selftext) > 0);
+
+  return (painful.length >= 5 ? painful : ranked).slice(0, 25);
 }

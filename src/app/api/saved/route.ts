@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSavedPainPoints, removePainPoint, savePainPoint } from "@/lib/saved-pain-points";
-import { PainPoint } from "@/lib/pain-points";
+import { isPainPoint } from "@/lib/pain-points";
 
 export async function GET() {
   const saved = await getSavedPainPoints();
@@ -9,9 +9,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const painPoint = (await request.json()) as PainPoint;
+    const painPoint: unknown = await request.json();
 
-    if (!painPoint?.id || !painPoint?.title || !painPoint?.permalink) {
+    if (!isPainPoint(painPoint)) {
       return NextResponse.json({ error: "Invalid pain point payload" }, { status: 400 });
     }
 

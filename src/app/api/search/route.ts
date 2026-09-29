@@ -3,29 +3,34 @@ import { ApifyConfigError } from "@/lib/apify";
 import { searchReddit } from "@/lib/sources/reddit";
 import { searchHackerNews } from "@/lib/sources/hn";
 import { searchTwitter } from "@/lib/sources/twitter";
-import type { PainSource } from "@/lib/pain-points";
+import { isPainSource, isTimeWindow, type PainPoint } from "@/lib/pain-points";
 
 // Apify-backed sources take a few minutes, so lift the default route timeout
 export const maxDuration = 300;
 
-const SOURCES: PainSource[] = ["reddit", "hn", "twitter"];
+// Reddit community names: letters, digits and underscores, up to 21 characters
+const SUBREDDIT_NAME = /^[A-Za-z0-9_]{2,21}$/;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q");
-  const source = (searchParams.get("source") || "reddit") as PainSource;
+  const source = searchParams.get("source") || "reddit";
   const time = searchParams.get("time") || "year";
 
   if (!q) {
     return NextResponse.json({ error: 'Query parameter "q" is required' }, { status: 400 });
   }
 
-  if (!SOURCES.includes(source)) {
+  if (!isPainSource(source)) {
     return NextResponse.json({ error: `Unknown source "${source}"` }, { status: 400 });
   }
 
+  if (!isTimeWindow(time)) {
+    return NextResponse.json({ error: `Unknown time window "${time}"` }, { status: 400 });
+  }
+
   try {
-    let painPoints;
+    let painPoints: PainPoint[];
 
     if (source === "hn") {
       painPoints = await searchHackerNews(q, time);
@@ -36,6 +41,10 @@ export async function GET(request: Request) {
         .split(",")
         .map((s) => s.trim().replace(/^r\//, ""))
         .filter(Boolean);
+      const invalid = subreddits.filter((s) => !SUBREDDIT_NAME.test(s));
+      if (invalid.length > 0) {
+        return NextResponse.json({ error: `Not a subreddit name: ${invalid.join(", ")}` }, { status: 400 });
+      }
       painPoints = await searchReddit({ query: q, subreddits, time });
     }
 

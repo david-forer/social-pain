@@ -17,6 +17,37 @@ export interface PainPoint {
   url?: string;
 }
 
+export const PAIN_SOURCES: PainSource[] = ["reddit", "hn", "twitter"];
+export const TIME_WINDOWS = ["week", "month", "year", "all"] as const;
+export type TimeWindow = (typeof TIME_WINDOWS)[number];
+
+export function isPainSource(value: unknown): value is PainSource {
+  return typeof value === "string" && (PAIN_SOURCES as string[]).includes(value);
+}
+
+export function isTimeWindow(value: unknown): value is TimeWindow {
+  return typeof value === "string" && (TIME_WINDOWS as readonly string[]).includes(value);
+}
+
+// Full shape check for items coming back from the browser before they are stored
+export function isPainPoint(value: unknown): value is PainPoint {
+  const p = value as Record<string, unknown> | null;
+  return (
+    !!p &&
+    typeof p.id === "string" && p.id.length > 0 &&
+    typeof p.title === "string" && p.title.length > 0 &&
+    typeof p.selftext === "string" &&
+    typeof p.subreddit === "string" &&
+    typeof p.score === "number" &&
+    typeof p.permalink === "string" && p.permalink.length > 0 &&
+    typeof p.created_utc === "number" &&
+    typeof p.num_comments === "number" &&
+    (p.type === "post" || p.type === "comment") &&
+    (p.source === undefined || isPainSource(p.source)) &&
+    (p.url === undefined || typeof p.url === "string")
+  );
+}
+
 export const SOURCE_LABELS: Record<PainSource, string> = {
   reddit: "Reddit",
   hn: "Hacker News",

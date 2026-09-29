@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SearchHero from "@/components/SearchHero";
 import PainPointCard from "@/components/PainPointCard";
 import SavedPanel from "@/components/SavedPanel";
@@ -20,6 +20,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<PainPoint[]>([]);
   const [tab, setTab] = useState<Tab>("results");
+  // Apify searches take minutes, so a newer search can start before an older
+  // one returns. Only the latest search is allowed to update the page.
+  const latestSearch = useRef(0);
 
   useEffect(() => {
     const loadSaved = async () => {
@@ -74,6 +77,7 @@ export default function Home() {
     e.preventDefault();
     if (!query.trim()) return;
 
+    const searchId = ++latestSearch.current;
     setIsSearching(true);
     setError(null);
     setHasSearched(true);
@@ -86,6 +90,7 @@ export default function Home() {
 
       const response = await fetch(`/api/search?${params}`);
       const data = await response.json();
+      if (searchId !== latestSearch.current) return;
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to fetch pain points. Please try again.");
@@ -93,9 +98,10 @@ export default function Home() {
 
       setResults(data.painPoints || []);
     } catch (err) {
+      if (searchId !== latestSearch.current) return;
       setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
-      setIsSearching(false);
+      if (searchId === latestSearch.current) setIsSearching(false);
     }
   };
 

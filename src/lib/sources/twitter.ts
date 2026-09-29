@@ -61,13 +61,11 @@ export async function searchTwitter(query: string, time: string): Promise<PainPo
 
   const tweets = await runApifyActor<ApifyTweet>(ACTOR_ID, input, RUN_TIMEOUT_SECS);
 
-  return tweets
-    .map(toPainPoint)
-    .filter((p): p is PainPoint => p !== null)
-    .sort((a, b) => {
-      const pain = painScore(b.selftext) - painScore(a.selftext);
-      if (pain !== 0) return pain;
-      return b.score + b.num_comments - (a.score + a.num_comments);
-    })
-    .slice(0, 25);
+  // Top search returns tweets in relevance order. Keep that order and use pain
+  // language as a filter, so a tweet stuffed with complaint words cannot
+  // outrank one that is actually about the query.
+  const points = tweets.map(toPainPoint).filter((p): p is PainPoint => p !== null);
+  const painful = points.filter((p) => painScore(p.selftext) > 0);
+
+  return (painful.length >= 5 ? painful : points).slice(0, 25);
 }
