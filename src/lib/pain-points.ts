@@ -15,6 +15,10 @@ export interface PainPoint {
   // Optional so items saved before multi-source support still load
   source?: PainSource;
   url?: string;
+  // Reddit username, useful for spotting vendors posing as commenters
+  author?: string;
+  // For comments: the id of the post they answer
+  parent_id?: string;
 }
 
 export const PAIN_SOURCES: PainSource[] = ["reddit", "hn", "twitter"];
@@ -44,7 +48,9 @@ export function isPainPoint(value: unknown): value is PainPoint {
     typeof p.num_comments === "number" &&
     (p.type === "post" || p.type === "comment") &&
     (p.source === undefined || isPainSource(p.source)) &&
-    (p.url === undefined || typeof p.url === "string")
+    (p.url === undefined || typeof p.url === "string") &&
+    (p.author === undefined || typeof p.author === "string") &&
+    (p.parent_id === undefined || typeof p.parent_id === "string")
   );
 }
 

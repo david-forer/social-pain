@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import SearchHero from "@/components/SearchHero";
 import PainPointCard from "@/components/PainPointCard";
 import SavedPanel from "@/components/SavedPanel";
-import { AlertCircle, Bookmark } from "lucide-react";
+import { AlertCircle, Bookmark, Download } from "lucide-react";
 import { PainPoint, PainSource } from "@/lib/pain-points";
+import { downloadCsv } from "@/lib/csv";
 
 type Tab = "results" | "saved";
 
@@ -145,6 +146,20 @@ export default function Home() {
               <Bookmark className="w-3.5 h-3.5" />
               Saved {saved.length > 0 && `(${saved.length})`}
             </button>
+            {(tab === "results" ? results : saved).length > 0 && (
+              <button
+                onClick={() =>
+                  tab === "results"
+                    ? downloadCsv(results, `${source}-${query}`)
+                    : downloadCsv(saved, "saved")
+                }
+                title="Download this list as a CSV file"
+                className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download CSV
+              </button>
+            )}
           </div>
 
           {error && (
@@ -197,7 +212,8 @@ export default function Home() {
                 <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl font-bold flex items-center gap-2">
-                      Found <span className="text-indigo-400">{results.length}</span> Pain Points
+                      Found <span className="text-indigo-400">{results.length}</span>{" "}
+                      {results.some((r) => r.type === "comment") ? "Posts and Comments" : "Pain Points"}
                     </h2>
                     <div className="px-3 py-1 bg-zinc-900 rounded-full border border-white/10 text-sm text-zinc-400">
                       Sorted by Relevance & Intensity

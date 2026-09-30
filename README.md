@@ -9,14 +9,16 @@ I use it before writing content or an offer, to check that a problem is real and
 - Searches Reddit (all of it, or the subreddits you list), Hacker News, or Twitter, over the past week, month, year or all time.
 - Keeps the posts that read like someone describing a problem, using a short list of phrases such as "struggling", "takes forever", "how do you" and "burnt out". The search engine's relevance order is kept, so a long off-topic rant can't jump the queue just because it's angry.
 - On Hacker News it ranks Ask HN and Tell HN threads first, since that's where people describe problems, and drops the monthly hiring threads.
+- On Reddit it also pulls the top comments on each post, since replies are where people get specific about what went wrong and what fixed it.
 - Lets you save the good ones to a panel, stored in a local JSON file.
+- Downloads any results list or your saved list as a CSV, with the full text, author and link for every row and a blank status column for working through it in a spreadsheet.
 
 ## How it works
 
 The browser calls one route, `/api/search?source=reddit|hn|twitter`. Each source lives in its own module under `src/lib/sources/` and maps its results onto one `PainPoint` shape, so the UI never needs to know where a post came from.
 
 - Hacker News uses the public Algolia API. It's free and answers in about a second, with no key needed.
-- Reddit runs an Apify scraper, because Reddit would not register an API app for this account. The scraper reads one post page at a time, so a search takes about three and a half minutes and costs roughly $0.14.
+- Reddit runs an Apify scraper, because Reddit would not register an API app for this account. The scraper reads one post page at a time, so a search takes about three and a half minutes. With up to eight top comments per post it returns around 60 posts and comments for roughly $0.36. `COMMENTS_PER_POST` in `src/lib/sources/reddit.ts` is the cost dial.
 - Twitter runs a pay-per-result Apify scraper. A search takes under a minute and costs about $0.025.
 
 Apify runs take longer than Node's `fetch` will hold a connection open, so `src/lib/apify.ts` starts a run, polls its status every five seconds, then reads the dataset. If the run outlives its deadline, the code aborts it on Apify so it stops spending credit. A run that times out after storing results still counts, since the scrapers write items as they go.

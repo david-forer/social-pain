@@ -44,12 +44,18 @@ export default function PainPointCard({ painPoint, isSaved, onSave, onRemove }: 
         </div>
       </div>
 
-      <h3 className="text-xl font-semibold text-zinc-100 mb-3 leading-snug">
-        {painPoint.title}
-      </h3>
+      {painPoint.type === "comment" ? (
+        <p className="text-xs font-medium text-indigo-300/80 mb-3 leading-snug">
+          Comment{painPoint.author ? ` by u/${painPoint.author}` : ""} on: {truncate(painPoint.title, 90)}
+        </p>
+      ) : (
+        <h3 className="text-xl font-semibold text-zinc-100 mb-3 leading-snug">
+          {painPoint.title}
+        </h3>
+      )}
 
       <div className="text-zinc-400 text-sm mb-6 flex-grow leading-relaxed">
-        {painPoint.selftext ? truncate(painPoint.selftext, 200) : <span className="italic text-zinc-600">No description provided</span>}
+        {painPoint.selftext ? truncate(painPoint.selftext, painPoint.type === "comment" ? 400 : 200) : <span className="italic text-zinc-600">No description provided</span>}
       </div>
 
       <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
